@@ -1,0 +1,508 @@
+import React, { useState, useEffect } from 'react';
+import { Search, User, FileText, AlertTriangle, CheckCircle, Clock, DollarSign, Shield, Eye, Download, Upload, Bell, Settings, Menu, X, Calendar, Star, MessageCircle, Plus, Edit, Filter, ArrowRight, TrendingUp, BarChart3, PieChart, Award, Gavel, FileCheck, AlertCircle, Users, Building, ChevronDown, Send, Printer } from 'lucide-react';
+
+const ProcurementApp = () => {
+  const [activeModule, setActiveModule] = useState('dashboard');
+  const [user, setUser] = useState({ name: 'John Kamara', role: 'Procurement Officer', ministry: 'Ministry of Health' });
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [notifications, setNotifications] = useState(3);
+
+  // Sample data for demonstration
+  const [procurements, setProcurements] = useState([
+    { id: 'PR-2025-001', title: 'Medical Equipment Procurement', value: 250000, method: 'ICB', status: 'Evaluation', deadline: '2025-06-15', category: 'Goods', plannedDate: '2025-03-15', bidsReceived: 8 },
+    { id: 'PR-2025-002', title: 'Office Supplies', value: 15000, method: 'RFQ', status: 'Awarded', deadline: '2025-05-20', category: 'Goods', plannedDate: '2025-02-01', bidsReceived: 12 },
+    { id: 'PR-2025-003', title: 'IT Infrastructure', value: 180000, method: 'NCB', status: 'Bidding', deadline: '2025-06-30', category: 'Services', plannedDate: '2025-04-01', bidsReceived: 6 },
+    { id: 'PR-2025-004', title: 'Road Construction Phase 2', value: 850000, method: 'ICB', status: 'Planning', deadline: '2025-08-15', category: 'Works', plannedDate: '2025-06-01', bidsReceived: 0 },
+    { id: 'PR-2025-005', title: 'Legal Consultancy Services', value: 45000, method: 'RFP', status: 'Planning', deadline: '2025-07-10', category: 'Consultancy', plannedDate: '2025-05-15', bidsReceived: 0 }
+  ]);
+
+  const [vendors, setVendors] = useState([
+    { id: 'V001', name: 'Sierra Medical Supplies Ltd', status: 'Active', rating: 4.5, compliance: 'Green', category: 'Medical Equipment', contracts: 15, totalValue: 2500000 },
+    { id: 'V002', name: 'West Africa Tech Solutions', status: 'Active', rating: 4.2, compliance: 'Green', category: 'IT Services', contracts: 8, totalValue: 1200000 },
+    { id: 'V003', name: 'Alpha Construction Co.', status: 'Suspended', rating: 2.1, compliance: 'Red', category: 'Construction', contracts: 3, totalValue: 800000 },
+    { id: 'V004', name: 'Prime Office Supplies', status: 'Active', rating: 4.0, compliance: 'Green', category: 'Office Supplies', contracts: 22, totalValue: 450000 }
+  ]);
+
+  const [contracts, setContracts] = useState([
+    { id: 'CT-2025-001', procurementId: 'PR-2025-002', vendor: 'Prime Office Supplies', value: 15000, status: 'Active', startDate: '2025-05-25', endDate: '2025-11-25', performance: 85 },
+    { id: 'CT-2024-089', procurementId: 'PR-2024-156', vendor: 'Sierra Medical Supplies Ltd', value: 120000, status: 'Completed', startDate: '2024-12-01', endDate: '2025-05-01', performance: 92 }
+  ]);
+
+  const [complaints, setComplaints] = useState([
+    { id: 'CMP-2025-001', type: 'Bid Rejection', status: 'Under Review', priority: 'High', submittedBy: 'Tech Innovations Ltd', date: '2025-05-20', procurementId: 'PR-2025-003', description: 'Unfair evaluation criteria applied' },
+    { id: 'CMP-2025-002', type: 'Process Violation', status: 'Resolved', priority: 'Medium', submittedBy: 'Alpha Construction Co.', date: '2025-05-15', procurementId: 'PR-2025-001', description: 'Late advertisement notification' }
+  ]);
+
+  const [bids, setBids] = useState([
+    { id: 'BID-001', procurementId: 'PR-2025-001', vendor: 'Sierra Medical Supplies Ltd', amount: 245000, status: 'Under Evaluation', submittedDate: '2025-05-10', technicalScore: 88, financialScore: 92 },
+    { id: 'BID-002', procurementId: 'PR-2025-001', vendor: 'Global Medical Corp', amount: 255000, status: 'Under Evaluation', submittedDate: '2025-05-10', technicalScore: 85, financialScore: 89 },
+    { id: 'BID-003', procurementId: 'PR-2025-003', vendor: 'West Africa Tech Solutions', amount: 175000, status: 'Submitted', submittedDate: '2025-05-18', technicalScore: 0, financialScore: 0 }
+  ]);
+
+  const modules = [
+    { id: 'dashboard', name: 'Dashboard', icon: <BarChart3 size={20} /> },
+    { id: 'planning', name: 'Procurement Planning', icon: <Calendar size={20} /> },
+    { id: 'vendors', name: 'Vendor Management', icon: <Users size={20} /> },
+    { id: 'bidding', name: 'Bidding Engine', icon: <Gavel size={20} /> },
+    { id: 'evaluation', name: 'Bid Evaluation', icon: <FileCheck size={20} /> },
+    { id: 'contracts', name: 'Contract Management', icon: <Award size={20} /> },
+    { id: 'audit', name: 'Audit Trail', icon: <Shield size={20} /> },
+    { id: 'complaints', name: 'Complaints & Redress', icon: <AlertTriangle size={20} /> }
+  ];
+
+  const DashboardModule = () => (
+    <div className="space-y-6">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg">
+        <h2 className="text-2xl font-bold mb-2">Sierra Leone Procurement Portal</h2>
+        <p className="opacity-90">Transparent • Compliant • Efficient</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-green-600 text-sm font-medium">Active Procurements</p>
+              <p className="text-2xl font-bold text-green-700">24</p>
+            </div>
+            <FileText className="text-green-500" size={24} />
+          </div>
+        </div>
+        
+        <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-blue-600 text-sm font-medium">Total Value</p>
+              <p className="text-2xl font-bold text-blue-700">Le 2.4B</p>
+            </div>
+            <DollarSign className="text-blue-500" size={24} />
+          </div>
+        </div>
+        
+        <div className="bg-orange-50 border border-orange-200 p-4 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-orange-600 text-sm font-medium">Pending Approvals</p>
+              <p className="text-2xl font-bold text-orange-700">8</p>
+            </div>
+            <Clock className="text-orange-500" size={24} />
+          </div>
+        </div>
+        
+        <div className="bg-red-50 border border-red-200 p-4 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-red-600 text-sm font-medium">Compliance Alerts</p>
+              <p className="text-2xl font-bold text-red-700">3</p>
+            </div>
+            <AlertTriangle className="text-red-500" size={24} />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white border rounded-lg p-6">
+          <h3 className="text-lg font-semibold mb-4">Recent Procurements</h3>
+          <div className="space-y-3">
+            {procurements.slice(0, 3).map(proc => (
+              <div key={proc.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                <div>
+                  <p className="font-medium">{proc.title}</p>
+                  <p className="text-sm text-gray-600">{proc.id} • {proc.method}</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold">Le {proc.value.toLocaleString()}</p>
+                  <span className={`text-xs px-2 py-1 rounded-full ${
+                    proc.status === 'Awarded' ? 'bg-green-100 text-green-700' :
+                    proc.status === 'Evaluation' ? 'bg-yellow-100 text-yellow-700' :
+                    proc.status === 'Planning' ? 'bg-gray-100 text-gray-700' :
+                    'bg-blue-100 text-blue-700'
+                  }`}>
+                    {proc.status}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white border rounded-lg p-6">
+          <h3 className="text-lg font-semibold mb-4">Compliance Dashboard</h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span>NPPA Threshold Compliance</span>
+              <span className="text-green-600 font-semibold">98%</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span>Vendor KYC Verification</span>
+              <span className="text-green-600 font-semibold">95%</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span>Publication Requirements</span>
+              <span className="text-yellow-600 font-semibold">87%</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span>Anti-Corruption Compliance</span>
+              <span className="text-green-600 font-semibold">100%</span>
+            </div>
+            <div className="mt-4 p-3 bg-blue-50 rounded">
+              <p className="text-sm text-blue-700">Next audit scheduled for June 15, 2025</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white border rounded-lg p-6">
+        <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <button 
+            onClick={() => setActiveModule('planning')}
+            className="flex items-center space-x-2 p-3 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
+          >
+            <Calendar className="text-blue-600" size={20} />
+            <span className="font-medium">Plan Procurement</span>
+          </button>
+          <button 
+            onClick={() => setActiveModule('vendors')}
+            className="flex items-center space-x-2 p-3 border border-green-200 rounded-lg hover:bg-green-50 transition-colors"
+          >
+            <Users className="text-green-600" size={20} />
+            <span className="font-medium">Register Vendor</span>
+          </button>
+          <button 
+            onClick={() => setActiveModule('bidding')}
+            className="flex items-center space-x-2 p-3 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors"
+          >
+            <Gavel className="text-purple-600" size={20} />
+            <span className="font-medium">Create Tender</span>
+          </button>
+          <button 
+            onClick={() => setActiveModule('audit')}
+            className="flex items-center space-x-2 p-3 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+          >
+            <Shield className="text-red-600" size={20} />
+            <span className="font-medium">Generate Report</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const PlanningModule = () => (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Procurement Planning</h2>
+        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2">
+          <Plus size={16} />
+          <span>Add Procurement Plan</span>
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white border rounded-lg p-4">
+          <h4 className="font-semibold text-blue-600 mb-2">Planned This Year</h4>
+          <div className="text-2xl font-bold text-blue-700">47</div>
+          <p className="text-sm text-gray-600">Total procurements</p>
+        </div>
+        <div className="bg-white border rounded-lg p-4">
+          <h4 className="font-semibold text-green-600 mb-2">Budget Allocated</h4>
+          <div className="text-2xl font-bold text-green-700">Le 12.5B</div>
+          <p className="text-sm text-gray-600">FY 2025 budget</p>
+        </div>
+        <div className="bg-white border rounded-lg p-4">
+          <h4 className="font-semibold text-orange-600 mb-2">In Progress</h4>
+          <div className="text-2xl font-bold text-orange-700">18</div>
+          <p className="text-sm text-gray-600">Active procurements</p>
+        </div>
+        <div className="bg-white border rounded-lg p-4">
+          <h4 className="font-semibold text-purple-600 mb-2">Completed</h4>
+          <div className="text-2xl font-bold text-purple-700">12</div>
+          <p className="text-sm text-gray-600">This quarter</p>
+        </div>
+      </div>
+
+      <div className="bg-white border rounded-lg p-6">
+        <h3 className="text-lg font-semibold mb-4">Annual Procurement Plan</h3>
+        <div className="flex items-center space-x-4 mb-4">
+          <select className="border rounded-lg px-3 py-2">
+            <option>All Categories</option>
+            <option>Goods</option>
+            <option>Services</option>
+            <option>Works</option>
+            <option>Consultancy</option>
+          </select>
+          <select className="border rounded-lg px-3 py-2">
+            <option>All Status</option>
+            <option>Planning</option>
+            <option>Approved</option>
+            <option>In Progress</option>
+            <option>Completed</option>
+          </select>
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-3 text-gray-400" size={16} />
+            <input
+              type="text"
+              placeholder="Search procurement plans..."
+              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b">
+                <th className="text-left p-3">Procurement Details</th>
+                <th className="text-left p-3">Category</th>
+                <th className="text-left p-3">Budget</th>
+                <th className="text-left p-3">Planned Date</th>
+                <th className="text-left p-3">Status</th>
+                <th className="text-left p-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {procurements.map(proc => (
+                <tr key={proc.id} className="border-b hover:bg-gray-50">
+                  <td className="p-3">
+                    <div>
+                      <p className="font-medium">{proc.title}</p>
+                      <p className="text-sm text-gray-600">{proc.id}</p>
+                    </div>
+                  </td>
+                  <td className="p-3">
+                    <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">
+                      {proc.category}
+                    </span>
+                  </td>
+                  <td className="p-3">
+                    <span className="font-semibold">Le {proc.value.toLocaleString()}</span>
+                  </td>
+                  <td className="p-3">
+                    <span className="text-sm">{proc.plannedDate}</span>
+                  </td>
+                  <td className="p-3">
+                    <span className={`px-2 py-1 rounded-full text-xs ${
+                      proc.status === 'Planning' ? 'bg-gray-100 text-gray-700' :
+                      proc.status === 'Bidding' ? 'bg-blue-100 text-blue-700' :
+                      proc.status === 'Evaluation' ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-green-100 text-green-700'
+                    }`}>
+                      {proc.status}
+                    </span>
+                  </td>
+                  <td className="p-3">
+                    <div className="flex space-x-2">
+                      <button className="text-blue-600 hover:text-blue-800">
+                        <Edit size={16} />
+                      </button>
+                      <button className="text-green-600 hover:text-green-800">
+                        <ArrowRight size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white border rounded-lg p-6">
+          <h3 className="text-lg font-semibold mb-4">Budget Utilization</h3>
+          <div className="space-y-4">
+            <div>
+              <div className="flex justify-between mb-2">
+                <span className="text-sm font-medium">Goods</span>
+                <span className="text-sm">Le 3.2B / Le 5.0B</span>
+              </div>
+              <div className="bg-gray-200 rounded-full h-2">
+                <div className="bg-blue-600 h-2 rounded-full" style={{width: '64%'}}></div>
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between mb-2">
+                <span className="text-sm font-medium">Services</span>
+                <span className="text-sm">Le 2.8B / Le 4.0B</span>
+              </div>
+              <div className="bg-gray-200 rounded-full h-2">
+                <div className="bg-green-600 h-2 rounded-full" style={{width: '70%'}}></div>
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between mb-2">
+                <span className="text-sm font-medium">Works</span>
+                <span className="text-sm">Le 1.5B / Le 3.0B</span>
+              </div>
+              <div className="bg-gray-200 rounded-full h-2">
+                <div className="bg-orange-600 h-2 rounded-full" style={{width: '50%'}}></div>
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between mb-2">
+                <span className="text-sm font-medium">Consultancy</span>
+                <span className="text-sm">Le 0.3B / Le 0.5B</span>
+              </div>
+              <div className="bg-gray-200 rounded-full h-2">
+                <div className="bg-purple-600 h-2 rounded-full" style={{width: '60%'}}></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white border rounded-lg p-6">
+          <h3 className="text-lg font-semibold mb-4">Procurement Timeline</h3>
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              <div className="flex-1">
+                <p className="text-sm font-medium">Q2 Procurements Completed</p>
+                <p className="text-xs text-gray-600">12 of 15 procurements</p>
+              </div>
+              <span className="text-xs text-gray-500">May 2025</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+              <div className="flex-1">
+                <p className="text-sm font-medium">Q3 Planning Phase</p>
+                <p className="text-xs text-gray-600">18 procurements in progress</p>
+              </div>
+              <span className="text-xs text-gray-500">Jun 2025</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
+              <div className="flex-1">
+                <p className="text-sm font-medium">Q4 Upcoming</p>
+                <p className="text-xs text-gray-600">17 procurements planned</p>
+              </div>
+              <span className="text-xs text-gray-500">Sep 2025</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const VendorModule = () => (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Vendor Management</h2>
+        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+          Register New Vendor
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white border rounded-lg p-4">
+          <h4 className="font-semibold text-green-600 mb-2">Active Vendors</h4>
+          <div className="text-2xl font-bold text-green-700">248</div>
+          <p className="text-sm text-gray-600">Verified & compliant</p>
+        </div>
+        <div className="bg-white border rounded-lg p-4">
+          <h4 className="font-semibold text-orange-600 mb-2">Pending Review</h4>
+          <div className="text-2xl font-bold text-orange-700">15</div>
+          <p className="text-sm text-gray-600">Awaiting verification</p>
+        </div>
+        <div className="bg-white border rounded-lg p-4">
+          <h4 className="font-semibold text-red-600 mb-2">Suspended</h4>
+          <div className="text-2xl font-bold text-red-700">7</div>
+          <p className="text-sm text-gray-600">Non-compliant</p>
+        </div>
+        <div className="bg-white border rounded-lg p-4">
+          <h4 className="font-semibold text-blue-600 mb-2">International</h4>
+          <div className="text-2xl font-bold text-blue-700">42</div>
+          <p className="text-sm text-gray-600">Foreign vendors</p>
+        </div>
+      </div>
+
+      <div className="bg-white border rounded-lg p-6">
+        <div className="flex items-center space-x-4 mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-3 text-gray-400" size={16} />
+            <input
+              type="text"
+              placeholder="Search vendors by name, ID, or service..."
+              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <select className="border rounded-lg px-3 py-2">
+            <option>All Status</option>
+            <option>Active</option>
+            <option>Suspended</option>
+            <option>Blacklisted</option>
+          </select>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b">
+                <th className="text-left p-3">Vendor Details</th>
+                <th className="text-left p-3">Category</th>
+                <th className="text-left p-3">Status</th>
+                <th className="text-left p-3">Compliance</th>
+                <th className="text-left p-3">Rating</th>
+                <th className="text-left p-3">Contracts</th>
+                <th className="text-left p-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {vendors.map(vendor => (
+                <tr key={vendor.id} className="border-b hover:bg-gray-50">
+                  <td className="p-3">
+                    <div>
+                      <p className="font-medium">{vendor.name}</p>
+                      <p className="text-sm text-gray-600">ID: {vendor.id}</p>
+                    </div>
+                  </td>
+                  <td className="p-3">
+                    <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">
+                      {vendor.category}
+                    </span>
+                  </td>
+                  <td className="p-3">
+                    <span className={`px-2 py-1 rounded-full text-xs ${
+                      vendor.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                    }`}>
+                      {vendor.status}
+                    </span>
+                  </td>
+                  <td className="p-3">
+                    <div className={`w-3 h-3 rounded-full ${
+                      vendor.compliance === 'Green' ? 'bg-green-500' : 'bg-red-500'
+                    }`}></div>
+                  </td>
+                  <td className="p-3">
+                    <div className="flex items-center">
+                      <Star className="text-yellow-500 fill-current" size={16} />
+                      <span className="ml-1">{vendor.rating}</span>
+                    </div>
+                  </td>
+                  <td className="p-3">
+                    <div className="text-sm">
+                      <div>{vendor.contracts} contracts</div>
+                      <div className="text-gray-600">Le {vendor.totalValue.toLocaleString()}</div>
+                    </div>
+                  </td>
+                  <td className="p-3">
+                    <button className="text-blue-600 hover:text-blue-800 mr-3">View</button>
+                    <button className="text-green-600 hover:text-green-800">Verify</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white border rounded-lg p-4">
+          <h4 className="font-semibold mb-2">NASSIT Verification</h4>
+          <p className="text-sm text-gray-600 mb-3">Auto-verify vendor NASSIT compliance</p>
+          <button className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">
+            Run Verification
+          </button>
+        </div>
+        
+        <div className="bg-white border rounded-lg p-4">
+          <h4 className="font-semibold mb-2">NRA Tax Clearance</h4>
+          <p className="text-sm text-gray-600 mb-3">Check NRA
